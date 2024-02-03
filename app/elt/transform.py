@@ -87,3 +87,44 @@ class TransformData(Logs):
         self.logs.write(f'{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}: Finished cleaning data')
 
         return df
+
+    def agg_data(self, df: DataFrame) -> DataFrame:
+        '''
+        Realiza a agregação dos dados.
+
+        Args:
+            df (DataFrame): DataFrame com os dados
+
+        Returns:
+            DataFrame: DataFrame com os dados agregados
+        '''
+        self.logs.write(f'{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}: Starting to aggregate data')
+
+        # realiza a agregação dos dados por user_id, action, source e device_type, contando as ações
+        df = df.groupBy('user_id', 'action', 'source', 'device_type').agg(f.count('user_id').alias('action_count'))
+
+        self.logs.write(f'{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}: Finished aggregating data')
+        return df
+
+    def top_actions(self, df: DataFrame) -> DataFrame:
+        '''
+        Obtem as ações mais realizadas por user_id, source, device_type.
+
+        Args:
+            df (DataFrame): DataFrame com os dados
+
+        Returns:
+            DataFrame: DataFrame com as ações mais realizadas
+        '''
+        self.logs.write(f'{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}: Starting to get top actions')
+
+        # crio uma janela particionada por user_id, action, source e device_type, ordenada pela quantidade de ações
+        window = Window.partitionBy("user_id", "action", "source", "device_type").orderBy(col("action_count").desc())
+        # crio uma coluna rank com a posição da linha na janela
+        df = df.withColumn("rank", row_number().over(window))
+        # filtro as linhas com rank menor ou igual a 3 (top 3 ações mais realizadas por user_id, source e device_type)
+        df = df.filter(col('rank') <= 3)
+
+        self.logs.write(f'{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}: Finished getting top actions')
+
+        return df
