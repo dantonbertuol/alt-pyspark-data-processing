@@ -40,7 +40,7 @@ Nesta etapa é realizada a transformação dos dados extraídos. As transformaç
 ## Execução do Projeto
 Para executar o projeto, é necessário ter o Docker instalado e em execução.
 
-Tendo isso, basta clonar o repositório (`git clone https://github.com/dantonbertuol/alt-pyspark-data-processing`) e executar o comando `docker-compose up` na pasta raiz do projeto. O comando irá criar um container com o ambiente necessário para execução do projeto e executar a aplicação.
+Tendo isso, basta clonar o repositório (`git clone https://github.com/dantonbertuol/alt-pyspark-data-processing`), acessar a pasta (`cd alt-pyspark-data-processing`) e executar o comando `docker-compose up` na pasta raiz do projeto. O comando irá criar um container com o ambiente necessário para execução do projeto e executar a aplicação.
 Caso ocorra algum erro é possível tentar o comando `docker-compose up --build --force-recreate --no-deps` que força o rebuild da imagem.
 
 O resultado da execução será um arquivo parquet com os dados classificados e agregados, na pasta `app/files` com o nome de `output_results.parquet`.
