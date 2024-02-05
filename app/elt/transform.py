@@ -103,6 +103,9 @@ class TransformData(Logs):
         # realiza a agregação dos dados por user_id, action, source e device_type, contando as ações
         df = df.groupBy('user_id', 'action', 'source', 'device_type').agg(f.count('user_id').alias('action_count'))
 
+        # ordena os dados por user_id e action_count
+        df = df.orderBy(col('user_id').asc(), col('action_count').desc())
+
         self.logs.write(f'{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}: Finished aggregating data')
         return df
 
@@ -118,8 +121,8 @@ class TransformData(Logs):
         '''
         self.logs.write(f'{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}: Starting to get top actions')
 
-        # crio uma janela particionada por user_id, action, source e device_type, ordenada pela quantidade de ações
-        window = Window.partitionBy("user_id", "action", "source", "device_type").orderBy(col("action_count").desc())
+        # crio uma janela particionada por user_id, source e device_type, ordenada pela quantidade de ações
+        window = Window.partitionBy("user_id", "source", "device_type").orderBy(col("action_count").desc())
         # crio uma coluna rank com a posição da linha na janela
         df = df.withColumn("rank", row_number().over(window))
         # filtro as linhas com rank menor ou igual a 3 (top 3 ações mais realizadas por user_id, source e device_type)
